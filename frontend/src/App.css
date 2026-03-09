@@ -1,0 +1,13 @@
+/* Global Styles */
+* {
+  scroll-behavior: smooth;
+}
+
+.App {
+  min-height: 100vh;
+}
+
+/* Custom utility for scale on hover */
+.scale-103 {
+  transform: scale(1.03);
+}
