@@ -16,6 +16,9 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 
+# npm lock file (project uses yarn, not npm)
+package-lock.json
+
 # Testing
 /coverage
 
@@ -30,8 +33,10 @@ next-env.d.ts
 dist/
 dist
 
-# Environment files (comprehensive coverage)
-
+# Environment files (never commit secrets!)
+.env
+.env.*
+!.env.example
 *token.json*
 *credentials.json*
 
