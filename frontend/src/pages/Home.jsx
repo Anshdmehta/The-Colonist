@@ -1,83 +1,231 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import AlumniSection from '../components/AlumniSection';
 import { Button } from '../components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Settings, Target, Grid, MessageSquare } from 'lucide-react';
+import WhoWeAreSection from '../components/WhoWeAreSection';
 
 const Home = () => {
-  const [activeProgram, setActiveProgram] = useState(0);
+  const [activeProgram, setActiveProgram] = useState('sixMonth');
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [cardStyle, setCardStyle] = useState({ rotateX: 0, rotateY: 0 });
+  const [spotlightPos, setSpotlightPos] = useState({ x: 50, y: 50 });
+
+  const themes = {
+    sixMonth: {
+      primary: '#F2C94C', // Amber
+      secondary: 'rgba(242, 201, 76, 0.4)',
+      glow: 'rgba(242, 201, 76, 0.15)',
+      border: 'rgba(242, 201, 76, 0.35)',
+      spotlight: 'rgba(242, 201, 76, 0.12)',
+      ambient: 'rgba(242, 201, 76, 0.1)',
+    },
+    oneYear: {
+      primary: '#3FAF8E', // Emerald Steel
+      secondary: 'rgba(63, 175, 142, 0.4)',
+      glow: 'rgba(63, 175, 142, 0.25)',
+      border: 'rgba(63, 175, 142, 0.35)',
+      spotlight: 'rgba(63, 175, 142, 0.25)',
+      ambient: 'rgba(63, 175, 142, 0.25)',
+    },
+    twoYear: {
+      primary: '#D97706', // Copper Orange
+      secondary: 'rgba(217, 119, 6, 0.4)',
+      glow: 'rgba(217, 119, 6, 0.15)',
+      border: 'rgba(217, 119, 6, 0.35)',
+      spotlight: 'rgba(217, 119, 6, 0.12)',
+      ambient: 'rgba(217, 119, 6, 0.1)',
+    },
+    threeYear: {
+      primary: '#A855F7', // Purple
+      secondary: 'rgba(168, 85, 247, 0.4)',
+      glow: 'rgba(168, 85, 247, 0.15)',
+      border: 'rgba(168, 85, 247, 0.35)',
+      spotlight: 'rgba(168, 85, 247, 0.12)',
+      ambient: 'rgba(168, 85, 247, 0.1)',
+    },
+  };
+
+  const currentTheme = themes[activeProgram];
+
+  const handleMouseMove = (e) => {
+    if (window.innerWidth < 768) return;
+    const { clientX, clientY } = e;
+
+    const x = (clientX / window.innerWidth - 0.5) * 20;
+    const y = (clientY / window.innerHeight - 0.5) * 20;
+
+    setMousePosition({ x, y });
+  };
+
+  const handleCardMove = (e) => {
+    if (window.innerWidth < 768) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateY = ((x - centerX) / centerX) * 5;
+    const rotateX = -((y - centerY) / centerY) * 5;
+
+    setCardStyle({ rotateX, rotateY });
+
+    // Update spotlight position variables
+    const xPct = (x / rect.width) * 100;
+    const yPct = (y / rect.height) * 100;
+    setSpotlightPos({ x: xPct, y: yPct });
+  };
+
+  const handleCardLeave = () => {
+    setCardStyle({ rotateX: 0, rotateY: 0 });
+  };
 
   const programs = [
     {
+      id: 'sixMonth',
       title: '6 Month Program',
-      defaultImage: '/assets/programs/piston.png',
-      hoverImage: '/assets/programs/lamp.png',
+      description: 'For artists seeking to upgrade their portfolio quality.',
+      image: '/assets/programs/lamp.png',
     },
     {
+      id: 'oneYear',
       title: '1 Year Diploma',
-      defaultImage: '/assets/programs/armor.png',
-      hoverImage: '/assets/programs/pistol.png',
+      description: 'Comprehensive foundation in game art pipelines and creation.',
+      image: '/assets/programs/armor.png',
     },
     {
+      id: 'twoYear',
       title: '2 Year Advanced Diploma',
-      defaultImage: '/assets/programs/aston.png',
-      hoverImage: '/assets/programs/pagani.png',
+      description: 'Advanced techniques for production-ready character and environment art.',
+      image: '/assets/programs/piston.png',
     },
     {
+      id: 'threeYear',
       title: '3 Year Professional Program',
-      defaultImage: '/assets/programs/female_mech.png',
-      hoverImage: '/assets/programs/yellow_robot.png',
+      description: 'Masterclass in game art, preparing you for lead roles in AAA studios.',
+      image: '/assets/programs/pistol_cu.png',
     },
   ];
 
-  const portfolioImages = [
-    '/crossbow.png',
-    '/rifle.png',
-    '/aston_martin.png',
-    '/i20.png',
-    '/bren.png',
-    '/Ogmech.png',
+  const portfolioItems = [
+    {
+      title: "ASTON MARTIN",
+      category: "Vehicles",
+      image: "/portfolio/car-main.webp"
+    },
+    {
+      title: "BREN",
+      category: "Weapon",
+      image: "/portfolio/bren.webp"
+    },
+    {
+      title: "MP-155 ULTIMA",
+      category: "Weapon",
+      image: "/portfolio/shotgun.webp"
+    },
+    {
+      title: "HYUNDAI I20 RALLY",
+      category: "Vehicle",
+      image: "/portfolio/I20.webp"
+    },
+    {
+      title: "AR-15 Rifle",
+      category: "Weapon",
+      image: "/portfolio/rifle.webp"
+    },
+    {
+      title: "CROSSBOW",
+      category: "Hard-Surface",
+      image: "/portfolio/crossbow.webp"
+    }
   ];
 
-  const careerPaths = [
-    'Character Artist',
-    'Hard Surface Artist',
-    'Environment Artist',
-    'Game Asset Artist',
-    'Freelance Game Artist',
-  ];
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
 
-  const studioLogos = [
-    '/rockstar_games.png',
-    '/ubisoft_games.png',
-    '/lakshay_digital.png',
-    '/amazon.png',
-    '/reeboot_games.png',
-    '/sumo_digital.png',
-    '/mandali_games.png',
-  ];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll('.reveal-on-scroll');
+    revealElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+
 
   return (
     <div className="bg-[#0E0E11] text-[#F5F5F7]">
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        <div className="absolute inset-0 z-0 bg-[#0E0E11]">
-          <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center justify-center">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(242,201,76,0.08)_0%,_transparent_60%)]"></div>
-            <img
-              src="/hero/white-mech.png"
-              alt="Game Art"
-              className="relative h-[80vh] object-contain opacity-90"
-            />
-          </div>
-        </div>
-        
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6 w-full">
-          <div className="max-w-[900px]">
-            <h1 className="font-['Sora'] text-[64px] leading-[1.1] font-semibold mb-5 text-[#F5F5F7]">
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-black">
+        {/* Layer 1 — Background Image (desktop only) */}
+        <div
+          className="absolute inset-0 z-0 hidden sm:block hero-bg"
+          style={{
+            backgroundImage: "url('/hero/white-mech.webp')",
+            backgroundPosition: 'right center',
+            filter: 'brightness(0.9) contrast(1.05) blur(0.5px)',
+            willChange: 'transform',
+          }}
+        />
+
+        {/* Layer 2 — Dark Overlay + Vignette */}
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background: `
+              linear-gradient(
+                90deg,
+                rgba(10,10,10,0.55) 0%,
+                rgba(10,10,10,0.35) 35%,
+                rgba(0,0,0,0) 70%
+              ),
+              radial-gradient(
+                circle at 25% 50%,
+                rgba(0,0,0,0.35),
+                transparent 45%
+              )
+            `,
+          }}
+        />
+
+        {/* Layer 3 — Text Protection Gradient */}
+        <div
+          className="absolute inset-0 z-[2] pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background: `
+              linear-gradient(
+                to right,
+                rgba(0,0,0,0.45),
+                rgba(0,0,0,0.2) 40%,
+                transparent 60%
+              )
+            `,
+            filter: 'blur(6px)',
+          }}
+        />
+
+        {/* Layer 4 — Content */}
+        <div className="relative z-10 max-w-[1400px] mx-auto px-6 w-full pt-20">
+          <div className="max-w-[700px]">
+            <h1 className="font-['Sora'] text-[64px] leading-[1.1] font-semibold mb-5 text-[#F5F5F7] hero-text-shadow">
               Industry-Focused Game Art Training
             </h1>
             <p className="text-[#B5B5C0] text-lg leading-[1.6] mb-8 max-w-[640px]">
@@ -96,78 +244,197 @@ const Home = () => {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Programs Interactive Section */}
-      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#0E0E11] relative overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-[35%_65%] gap-12 items-center">
-            {/* Left Side - Program Titles */}
-            <div className="space-y-8">
-              {programs.map((program, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-4 cursor-pointer group"
-                  onMouseEnter={() => setActiveProgram(index)}
-                >
-                  <div
-                    className={`w-[3px] h-10 transition-all duration-300 ${
-                      activeProgram === index ? 'bg-[#F2C94C] opacity-100' : 'bg-transparent opacity-0'
-                    }`}
-                  ></div>
-                  <h3
-                    className={`font-['Sora'] text-[28px] font-normal transition-all duration-300 ${
-                      activeProgram === index
-                        ? 'text-[#F2C94C]'
-                        : 'text-[#B5B5C0]'
-                    }`}
-                  >
-                    {program.title}
-                  </h3>
-                </div>
-              ))}
-            </div>
-
-            {/* Right Side - Artwork Display */}
-            <div className="relative h-[600px] flex items-center justify-center">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(77,163,255,0.06)_0%,_transparent_70%)]"></div>
-              {programs.map((program, index) => (
-                <img
-                  key={index}
-                  src={activeProgram === index ? program.hoverImage : program.defaultImage}
-                  alt={program.title}
-                  className={`absolute max-w-full max-h-full object-contain transition-opacity duration-400 ease-in-out ${
-                    activeProgram === index
-                      ? 'opacity-100'
-                      : 'opacity-0'
-                  }`}
-                />
-              ))}
-            </div>
+          {/* Mobile Fallback Image */}
+          <div className="sm:hidden mt-10">
+            <img
+              src="/hero/white-mech.webp"
+              alt="Futuristic robotic face representing game art training"
+              loading="lazy"
+              className="w-full max-h-[40vh] object-cover rounded-lg"
+            />
           </div>
         </div>
       </section>
 
+      {/* Programs Interactive Section */}
+      <section
+        className="relative flex items-center justify-center py-[80px] md:py-[120px] overflow-hidden px-4 sm:px-6"
+        onMouseMove={handleMouseMove}
+      >
+
+        {/* Background Motion Layer */}
+        <div
+          className="absolute inset-0 overflow-hidden z-0 transition-transform duration-300 ease-out"
+          style={{
+            transform: `translate(${mousePosition.x * -0.4}px, ${mousePosition.y * -0.4}px) scale(1.1)`,
+            willChange: 'transform'
+          }}
+        >
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover opacity-50"
+          >
+            <source src="/videos/ambient-background.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        {/* Dark Overlay */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{ background: 'linear-gradient(180deg, rgba(5,5,5,0.60), rgba(5,5,5,0.70))' }}
+        ></div>
+
+        {/* Noise Texture */}
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay z-0 transition-transform duration-300 ease-out"
+          style={{
+            backgroundImage: "url('/textures/noise.png')",
+            transform: `translate(${mousePosition.x * -0.2}px, ${mousePosition.y * -0.2}px)`,
+            willChange: 'transform'
+          }}
+        ></div>
+
+        {/* Ambient Light Behind Card */}
+        <div className="absolute inset-0 flex justify-center items-center pointer-events-none z-0">
+          <div
+            className="w-[900px] h-[600px] blur-3xl transition-all duration-[800ms] ease-out"
+            style={{
+              background: `radial-gradient(circle, ${currentTheme.glow}, transparent 60%)`,
+              transform: `translate(${mousePosition.x * -0.6}px, ${mousePosition.y * -0.6}px)`,
+              willChange: 'transform'
+            }}
+          />
+        </div>
+
+        {/* Main Card Container */}
+        <div
+          className="relative z-10 w-full max-w-[1200px] mx-auto rounded-2xl shadow-2xl px-6 py-12 md:px-12 md:py-16 h-auto md:h-[650px] grid grid-cols-1 md:grid-cols-2 items-center gap-12 backdrop-blur-md transition-all duration-[800ms] ease-out hover:-translate-y-2 hover:scale-[1.02] group/card"
+          onMouseMove={handleCardMove}
+          onMouseLeave={handleCardLeave}
+          style={{
+            border: `1px solid ${currentTheme.border}`,
+            boxShadow: `0 0 40px ${currentTheme.glow}`,
+            background: `
+              linear-gradient(145deg, #0c0c0c, #070707) padding-box,
+              linear-gradient(135deg, ${currentTheme.secondary}, rgba(60,60,60,0.35)) border-box
+            `,
+            transform: `perspective(1200px) rotateX(${cardStyle.rotateX}deg) rotateY(${cardStyle.rotateY}deg)`,
+            willChange: 'transform'
+          }}
+        >
+          {/* Cursor Spotlight Overlay */}
+          <div
+            className="absolute inset-0 z-0 pointer-events-none opacity-0 group-hover/card:opacity-100 transition-all duration-[800ms] rounded-2xl"
+            style={{
+              background: `radial-gradient(
+                circle at ${spotlightPos.x}% ${spotlightPos.y}%,
+                ${currentTheme.glow},
+                transparent 60%
+              )`
+            }}
+          />
+
+          {/* Left Side — Program List */}
+          <div className="flex flex-col space-y-8 md:space-y-6">
+            {programs.map((program) => (
+              <div
+                key={program.id}
+                className="flex items-start gap-4 cursor-pointer transition-all duration-300 group"
+                onMouseEnter={() => setActiveProgram(program.id)}
+                onClick={() => setActiveProgram(program.id)}
+              >
+                <div
+                  className={`w-[3px] transition-all duration-[800ms] mt-1.5 rounded-full ${activeProgram === program.id ? 'h-6 opacity-100' : 'h-0 opacity-0'
+                    }`}
+                  style={{ backgroundColor: activeProgram === program.id ? themes[program.id].primary : 'transparent' }}
+                ></div>
+                <div className="flex flex-col">
+                  <h3
+                    className={`font-['Sora'] text-2xl md:text-[28px] font-normal transition-all duration-[800ms] group-hover:translate-x-1 ${activeProgram === program.id ? 'translate-x-1' : 'text-neutral-400'
+                      }`}
+                    style={{ color: activeProgram === program.id ? themes[program.id].primary : undefined }}
+                  >
+                    {program.title}
+                  </h3>
+                  {/* Description under active program */}
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ${activeProgram === program.id ? 'max-h-32 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0 pointer-events-none'
+                      }`}
+                  >
+                    <p className="text-neutral-400 text-lg leading-[1.6]">
+                      {program.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Right Side — Image Panel */}
+          <div className="relative w-full max-w-[420px] aspect-square md:h-[420px] mx-auto md:ml-auto flex justify-center items-center">
+            {/* Image Glow */}
+            <div
+              className="absolute w-[420px] h-[420px] blur-3xl rounded-full z-0 pointer-events-none transition-all duration-[800ms] ease-out"
+              style={{ backgroundColor: currentTheme.glow }}
+            ></div>
+
+            <div className="w-full h-full rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative z-10 transition-transform duration-700 ease-out hover:scale-[1.05]">
+              {programs.map((program) => (
+                <img
+                  key={program.id}
+                  src={program.image}
+                  alt={program.title}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${activeProgram === program.id ? 'opacity-100' : 'opacity-0'
+                    }`}
+                />
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       {/* Portfolio Showcase */}
-      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#16161B]">
-        <div className="max-w-[1400px] mx-auto px-6">
+      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-gradient-to-b from-[#0b0b0b] to-[#060606] relative">
+        {/* Grain Overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.04] mix-blend-overlay">
+          <img src="/textures/noise.png" className="w-full h-full object-cover" alt="" />
+        </div>
+
+        <div className="max-w-[1400px] mx-auto px-6 relative z-10">
           <h2 className="font-['Sora'] text-[36px] font-semibold text-center mb-4 text-[#F5F5F7]">Portfolio</h2>
           <p className="text-[#B5B5C0] text-center mb-16 max-w-3xl mx-auto leading-[1.6]">
             Selected work created within The Colonist training environment.
           </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {portfolioImages.map((image, index) => (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {portfolioItems.map((item, index) => (
               <div
                 key={index}
-                className="rounded-xl overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
+                className={`rounded-xl overflow-hidden border border-neutral-800 relative group transition-all duration-500 hover:border-yellow-400/30 ${index === 0 ? 'md:col-span-2 md:row-span-2' : ''
+                  }`}
               >
+                {/* Image */}
                 <img
-                  src={image}
-                  alt={`Portfolio work ${index + 1}`}
-                  className="w-full h-auto object-cover"
+                  src={item.image}
+                  alt={item.title}
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                 />
+
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
+                  <h3 className="text-white text-xl font-semibold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                    {item.title}
+                  </h3>
+                  <p className="text-neutral-400 text-sm mt-1 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-75">
+                    {item.category}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -183,59 +450,87 @@ const Home = () => {
       </section>
 
       {/* Training Approach */}
-      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#0E0E11]">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <h2 className="font-['Sora'] text-[36px] font-semibold text-center mb-6 text-[#F5F5F7]">Training Approach</h2>
-          <p className="text-[#B5B5C0] text-center mb-16 max-w-4xl mx-auto leading-[1.6]">
-            Training at The Colonist focuses on practical workflows used in modern game production.
-            Students develop skills through structured projects, continuous critique sessions, and
-            production-focused pipelines used in professional studios.
+      <section className="section-premium-dark training-approach-section">
+        {/* Background Elements Shared with Alumni */}
+        <div className="alumni-grain-overlay"></div>
+        <div className="alumni-vignette"></div>
+        <div className="alumni-light-falloff"></div>
+
+        {/* Subtle Depth Lift */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center opacity-40">
+          <div className="w-[80%] h-[60%] bg-white/[0.015] blur-[120px] rounded-full"></div>
+        </div>
+
+        <div className="max-w-[1400px] mx-auto px-6 relative z-10 text-center">
+          <h2 className="heading-editorial mb-6 reveal-on-scroll">
+            Training <span className="highlight-gold">Approach</span>
+          </h2>
+          <p className="text-impact mb-16 reveal-on-scroll">
+            Built on real production workflows.<br />
+            Focused on skills studios actually use.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              'Industry Workflow Training',
-              'Focused Specialization',
-              'Portfolio Development',
-              'Mentorship and Critique',
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-[#16161B] border border-[#2A2A33] rounded-[10px] p-8 transition-transform duration-300 hover:-translate-y-1"
-              >
-                <h3 className="font-['Sora'] text-lg font-semibold text-[#F5F5F7]">{item}</h3>
-              </div>
-            ))}
+              { title: 'Industry Workflow Training', icon: Settings },
+              { title: 'Focused Specialization', icon: Target },
+              { title: 'Portfolio Development', icon: Grid },
+              { title: 'Mentorship and Critique', icon: MessageSquare },
+            ].map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={index}
+                  className="card-premium reveal-on-scroll"
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  <Icon className="card-icon" size={24} />
+                  <h3 className="card-title">{item.title}</h3>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Studio Opportunities */}
-      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#16161B] relative overflow-hidden">
+      <section className="section-premium-dark studio-opp-section -mt-px">
+        {/* Background Elements Shared with Alumni */}
+        <div className="alumni-grain-overlay"></div>
+        <div className="alumni-vignette"></div>
+
+        {/* Subtle Depth Lift */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center opacity-40">
+          <div className="w-[80%] h-[60%] bg-white/[0.015] blur-[120px] rounded-full"></div>
+        </div>
+
         <div className="absolute inset-0 z-0">
           <img
             src="/Studio1.png"
-            alt="Studio"
-            className="w-full h-full object-cover opacity-20"
+            alt=""
+            className="w-full h-full object-cover opacity-[0.05] grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#16161B] via-[#16161B]/80 to-[#16161B]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#030303] via-transparent to-[#030303]"></div>
         </div>
-        
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6">
-          <h2 className="font-['Sora'] text-[36px] font-semibold mb-6 text-[#F5F5F7]">Studio Opportunities</h2>
-          <p className="text-[#B5B5C0] mb-12 max-w-3xl leading-[1.6]">
-            Students demonstrating strong discipline and production-quality work may be considered
-            for studio-related opportunities during or after training.
+
+        <div className="relative z-10 max-w-[1400px] mx-auto px-6 text-center">
+          <h2 className="heading-editorial mb-6 reveal-on-scroll">
+            Studio <span className="highlight-gold">Opportunities</span>
+          </h2>
+          <p className="text-impact mb-16 reveal-on-scroll">
+            Pathways to the professional world.<br />
+            Bridging the gap between training and studio production.
           </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <div className="flex justify-center gap-6 flex-wrap">
             {['Internships', 'Production collaboration projects', 'Studio support roles'].map(
               (item, index) => (
                 <div
                   key={index}
-                  className="bg-[#16161B] border border-[#2A2A33] rounded-[10px] p-8 transition-transform duration-300 hover:-translate-y-1"
+                  className="card-premium reveal-on-scroll md:w-[350px] w-full items-center justify-center text-center"
+                  style={{ transitionDelay: `${index * 150}ms` }}
                 >
-                  <p className="text-[#F5F5F7] font-medium">{item}</p>
+                  <h3 className="card-title">{item}</h3>
                 </div>
               )
             )}
@@ -243,76 +538,12 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Career Pathways */}
-      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#0E0E11]">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <h2 className="font-['Sora'] text-[36px] font-semibold text-center mb-16 text-[#F5F5F7]">Career Pathways</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {careerPaths.map((career, index) => (
-              <div
-                key={index}
-                className="bg-[#16161B] border border-[#2A2A33] rounded-[10px] p-8 text-center transition-transform duration-300 hover:-translate-y-1"
-              >
-                <h3 className="font-['Sora'] text-xl font-semibold text-[#F5F5F7]">
-                  {career}
-                </h3>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Industry Connections Strip */}
-      <section className="py-16 bg-[#16161B]">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <h3 className="text-center text-[#B5B5C0] text-base mb-10 leading-[1.6]">
-            Our alumni work with leading game studios
-          </h3>
-          <div className="flex flex-wrap justify-center items-center gap-12">
-            {studioLogos.map((logo, index) => (
-              <img
-                key={index}
-                src={logo}
-                alt={`Studio ${index + 1}`}
-                className="h-8 opacity-70 hover:opacity-100 transition-opacity duration-300 filter brightness-0 invert"
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Alumni / Trusted By Section */}
+      <AlumniSection />
 
       {/* Who We Are */}
-      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#0E0E11]">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="font-['Sora'] text-[36px] font-semibold mb-6 text-[#F5F5F7]">Who We Are</h2>
-              <div className="text-[#B5B5C0] space-y-4 leading-[1.6] max-w-[680px]">
-                <p>
-                  The Colonist is a focused training environment designed around production pipelines
-                  used in professional game development.
-                </p>
-                <p>
-                  Our programs emphasize disciplined workflows, specialization in core game art, and
-                  portfolio development aligned with industry expectations.
-                </p>
-                <p>
-                  Students learn through structured mentorship, project-based training, and continuous
-                  feedback designed to prepare them for studio environments.
-                </p>
-              </div>
-            </div>
-            <div className="rounded-xl overflow-hidden">
-              <img
-                src="/studio/studio3.webp"
-                alt="Our Studio"
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      <WhoWeAreSection />
 
       {/* Final CTA */}
       <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#16161B] relative overflow-hidden">
@@ -324,7 +555,7 @@ const Home = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#16161B] via-[#16161B]/70 to-[#16161B]/50"></div>
         </div>
-        
+
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 text-center">
           <h2 className="font-['Sora'] text-[48px] font-semibold mb-6 text-[#F5F5F7]">
             Start Your Game Art Journey
