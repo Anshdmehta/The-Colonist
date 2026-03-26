@@ -818,250 +818,144 @@ code {
 /* Who We Are (Premium, Scroll-Synced Typography) */
 .who-we-are-section {
   position: relative;
+  min-height: 220vh;
+  overflow: clip;
   background:
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.02), transparent 26%),
-    radial-gradient(circle at 84% 78%, rgba(255, 255, 255, 0.015), transparent 24%),
-    linear-gradient(180deg, #050505 0%, #030303 52%, #070707 100%);
-  overflow: visible;
-  height: 190vh; /* 180–200vh pinned hero moment */
+    linear-gradient(180deg, #060606 0%, #050505 38%, #090909 100%);
 }
 
-.who-we-are-pinned {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  z-index: 1;
+.who-we-are-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 46%, rgba(255, 255, 255, 0.03), transparent 34%),
+    radial-gradient(circle at 80% 52%, rgba(255, 255, 255, 0.022), transparent 32%);
+  opacity: 0.9;
 }
 
 .who-we-are-background {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
   overflow: hidden;
+  z-index: 0;
 }
 
-.wwa-blob,
-.wwa-radial-glow,
-.wwa-grain,
-.who-we-are-structureLine {
+.who-we-are-heroWord {
   position: absolute;
-  pointer-events: none;
-  will-change: transform;
-}
-
-/* ── Abstract blobs — positioned at edges, never behind text centre ── */
-
-/* Blob 1: top-left corner — warm, barely visible */
-.wwa-blob--1 {
-  width: clamp(320px, 44vw, 680px);
-  aspect-ratio: 1 / 1;
-  top: -10%;
-  left: -14%;
-  border-radius: 52% 48% 60% 40% / 46% 54% 46% 54%;
-  background: radial-gradient(circle at 40% 40%, rgba(193, 142, 61, 0.065), transparent 68%);
-  filter: blur(64px);
-  opacity: 0.62;
-}
-
-/* Blob 2: bottom-right corner — white haze with faint gold warmth */
-.wwa-blob--2 {
-  width: clamp(280px, 38vw, 580px);
-  aspect-ratio: 1 / 1;
-  bottom: -8%;
-  right: -12%;
-  border-radius: 44% 56% 50% 50% / 54% 44% 56% 46%;
-  background: radial-gradient(circle at 58% 62%, rgba(255, 255, 255, 0.05), rgba(189, 145, 72, 0.028) 38%, transparent 70%);
-  filter: blur(72px);
-  opacity: 0.58;
-}
-
-/* Blob 3: top-right — cool atmospheric lift */
-.wwa-blob--3 {
-  width: clamp(200px, 26vw, 420px);
-  aspect-ratio: 1 / 1;
-  top: 5%;
-  right: 2%;
-  border-radius: 60% 40% 54% 46% / 42% 58% 42% 58%;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.038), transparent 72%);
-  filter: blur(54px);
-  opacity: 0.46;
-}
-
-/* Ambient gold accent — intentionally secondary to the white particles */
-.wwa-radial-glow {
-  width: 58vw;
-  max-width: 860px;
-  aspect-ratio: 1.3 / 1;
-  left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse at 50% 50%, rgba(198, 145, 62, 0.042), rgba(255, 255, 255, 0.015) 34%, transparent 72%);
-  filter: blur(40px);
-  opacity: 1;
+  left: 46%;
+  transform-origin: center;
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(320px, 88vw, 1200px);
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  line-height: 0.82;
+  color: #ffffff;
+  white-space: nowrap;
+  filter: blur(8px);
+  user-select: none;
 }
 
-/* Grain overlay — prevents flat-background feel */
-.wwa-grain {
-  inset: 0;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+.who-we-are-grain {
+  position: absolute;
+  inset: -2%;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   background-size: 220px 220px;
   mix-blend-mode: soft-light;
 }
 
-/* ── Particle clusters ───────────────────────────────────────────────────────
-   Two organic dot clusters positioned at corners — never behind text center.
-   Each cluster is a relative-positioned container; dots are absolute inside it.
-   The container itself is moved via JS parallax (translate3d on inline style).
-── */
-.wwa-particle-cluster {
-  position: absolute;
-  pointer-events: none;
-  will-change: transform;
-  /* Cluster container — sized to give breathing room around particles */
-  width: clamp(220px, 28vw, 420px);
-  aspect-ratio: 1 / 1;
-  transform-origin: center;
-  opacity: 0.92;
-  background:
-    radial-gradient(circle at 34% 38%, rgba(255, 255, 255, 0.065), transparent 28%),
-    radial-gradient(circle at 62% 56%, rgba(255, 255, 255, 0.052), transparent 32%),
-    radial-gradient(circle at 44% 48%, rgba(192, 145, 70, 0.032), transparent 42%);
-  /* Soft radial mask so cluster edges dissolve into background */
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 0%, black 30%, rgba(0, 0, 0, 0.78) 48%, transparent 78%);
-  mask-image: radial-gradient(ellipse at 50% 50%, black 0%, black 30%, rgba(0, 0, 0, 0.78) 48%, transparent 78%);
-  /* Extra blur on the whole cluster makes it atmospheric, not dotty */
-  filter: blur(1px);
-}
-
-/* Cluster A: anchored top-left, clear of the text centre */
-.wwa-particle-cluster--a {
-  top: -8%;
-  left: -6%;
-}
-
-/* Cluster B: anchored bottom-right, clear of the text centre */
-.wwa-particle-cluster--b {
-  bottom: -8%;
-  right: -6%;
-}
-
-/* Individual particle dot */
-.wwa-particle {
-  position: absolute;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 38% 38%, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.42) 52%, transparent 100%);
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.08);
-  /* Slight per-particle softness keeps some dots crisper and some more diffuse */
-  filter: blur(0.85px);
-  will-change: opacity;
-}
-
-.wwa-particle:nth-child(3n) {
-  filter: blur(0.4px);
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.06);
-}
-
-.wwa-particle:nth-child(4n) {
-  filter: blur(1.2px);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.09);
-}
-
-/* Fine noise overlay — unifies the whole section surface, very faint */
-.wwa-noise-overlay {
+.who-we-are-vignette {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  will-change: transform;
-  opacity: 0.022;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 300px 300px;
-  mix-blend-mode: soft-light;
+  background:
+    linear-gradient(90deg, rgba(3, 3, 3, 0.78) 0%, rgba(3, 3, 3, 0.14) 24%, rgba(3, 3, 3, 0.16) 76%, rgba(3, 3, 3, 0.72) 100%),
+    linear-gradient(180deg, rgba(3, 3, 3, 0.76) 0%, rgba(3, 3, 3, 0.08) 22%, rgba(3, 3, 3, 0.08) 78%, rgba(3, 3, 3, 0.8) 100%);
 }
 
-.who-we-are-structureLine {
-  left: 0;
-  right: 0;
-  width: min(56vw, 760px);
-  height: 1px;
-  margin-inline: auto;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12) 18%, rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0.12) 82%, transparent);
-  opacity: 0.22;
-}
-
-.who-we-are-structureLine--top {
-  top: 26%;
+.who-we-are-sticky {
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  padding: clamp(32px, 5vw, 72px) 24px;
 }
 
 .who-we-are-inner {
   position: relative;
   z-index: 1;
-  max-width: 640px;
-  padding: 0;
-  margin: 0 auto;
+  width: min(520px, calc(100vw - 48px));
+  margin-left: clamp(8%, 9vw, 12%);
 }
 
 .who-we-are-eyebrow {
   font-family: 'Sora', sans-serif;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
-  font-size: 11px;
-  color: rgba(245, 245, 247, 0.72);
-  margin-bottom: 28px;
+  letter-spacing: 0.34em;
+  font-size: clamp(10px, 0.8vw, 12px);
+  color: rgba(245, 245, 247, 0.58);
+  margin: 0 0 clamp(24px, 3vh, 34px);
 }
 
-/* ── Statement list ── */
 .wwa-statements {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(20px, 2.8vh, 36px);
   margin: 0;
-  padding: 0;
 }
 
-/* Each line is a block paragraph */
 .wwa-statement {
   margin: 0;
   padding: 0;
   font-family: 'Sora', sans-serif;
-  font-weight: 600;
-  font-size: clamp(22px, 2.8vw, 32px);
-  line-height: 1.45;
-  color: rgba(245, 245, 247, 1);
-  /* Default: slightly dimmed — past lines stay readable but step back */
-  opacity: 0.48;
-  transition: opacity 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-size: clamp(22px, 2.2vw, 34px);
+  line-height: 1.48;
+  letter-spacing: -0.03em;
+  color: rgba(245, 245, 247, 0.9);
+  opacity: 0.42;
+  transition: opacity 0.45s ease;
 }
 
-/* Active line — full brightness */
 .wwa-statement--active {
-  opacity: 1;
+  opacity: 0.98;
 }
 
-/* Past lines — softer dim, still very readable */
 .wwa-statement--past {
-  opacity: 0.52;
+  opacity: 0.58;
+}
+
+.wwa-statement--line-1 {
+  font-weight: 700;
+  margin-bottom: clamp(14px, 1.9vh, 20px);
+}
+
+.wwa-statement--line-2 {
+  font-weight: 520;
+  margin-bottom: clamp(18px, 2.5vh, 28px);
+}
+
+.wwa-statement--line-3 {
+  font-weight: 520;
+  margin-bottom: clamp(24px, 3.4vh, 36px);
+}
+
+.wwa-statement--line-4 {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.98);
 }
 
 .who-we-are-dividerRow {
-  display: flex;
-  justify-content: center;
-  margin-top: clamp(80px, 7vh, 120px);
+  margin-top: clamp(42px, 6vh, 72px);
 }
 
 .who-we-are-divider {
-  height: 1px; /* thin divider */
-  width: 50%; /* 40–60% requirement (final = 50%) */
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18) 18%, rgba(255, 255, 255, 0.42) 50%, rgba(255, 255, 255, 0.18) 82%, transparent);
-  opacity: 0; /* driven by inline style */
-  transform-origin: center;
-  transform: scaleX(0); /* driven by inline style */
+  height: 1px;
+  width: clamp(100px, 11vw, 140px);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08));
+  opacity: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
   will-change: opacity, transform;
 }
 
@@ -1072,77 +966,30 @@ code {
 
 @media (max-width: 768px) {
   .who-we-are-section {
-    height: 185vh;
+    min-height: 205vh;
   }
 
-  .who-we-are-pinned {
-    padding: 0 18px;
+  .who-we-are-sticky {
+    padding-inline: 18px;
   }
 
-  .wwa-blob--1 {
-    width: 80vw;
-    left: -20%;
-    top: -6%;
-    filter: blur(44px);
-  }
-
-  .wwa-blob--2 {
-    width: 70vw;
-    right: -18%;
-    bottom: -6%;
-    filter: blur(52px);
-  }
-
-  .wwa-blob--3 {
-    width: 50vw;
-    right: -6%;
-    top: 4%;
-    filter: blur(38px);
-  }
-
-  .wwa-radial-glow {
-    width: 100vw;
-    filter: blur(24px);
-  }
-
-  .who-we-are-structureLine--top {
-    top: 22%;
+  .who-we-are-heroWord {
+    left: 54%;
+    font-size: 98vw;
+    filter: blur(6px);
   }
 
   .who-we-are-inner {
-    max-width: 100%;
-    padding: 0;
+    width: min(100%, 420px);
+    margin-left: 0;
   }
 
   .wwa-statement {
-    font-size: clamp(20px, 5.5vw, 26px);
-  }
-
-  .wwa-statements {
-    gap: 20px;
+    font-size: clamp(20px, 5.5vw, 28px);
+    line-height: 1.52;
   }
 
   .who-we-are-dividerRow {
-    margin-top: 60px;
-  }
-
-  .wwa-particle-cluster {
-    width: 60vw;
-    filter: blur(1.15px);
-  }
-
-  .wwa-particle-cluster--a {
-    top: -4%;
-    left: -12%;
-  }
-
-  .wwa-particle-cluster--b {
-    bottom: -4%;
-    right: -12%;
-  }
-
-  /* Hide fine noise overlay on mobile to keep rendering light */
-  .wwa-noise-overlay {
-    display: none;
+    margin-top: 48px;
   }
 }
