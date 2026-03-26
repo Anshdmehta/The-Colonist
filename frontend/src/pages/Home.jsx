@@ -231,7 +231,7 @@ const Home = () => {
             <p className="text-[#B5B5C0] text-lg leading-[1.6] mb-8 max-w-[640px]">
               Build production-ready skills and professional portfolios for real-time game development.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 mb-8">
               <Link to="/programs">
                 <Button className="bg-[#F2C94C] text-[#0E0E11] hover:bg-[#F2C94C]/90 font-medium px-8 h-12 text-base rounded-md">
                   View Programs
@@ -242,6 +242,16 @@ const Home = () => {
                   View Portfolio
                 </Button>
               </Link>
+            </div>
+
+            {/* Mobile Robot Image - Shows Below Text on Small Screens */}
+            <div className="sm:hidden mt-8">
+              <img
+                src="/hero/white-mech.png"
+                alt="Futuristic robotic face representing game art training"
+                className="w-full max-h-[40vh] object-cover rounded-lg"
+                loading="lazy"
+              />
             </div>
           </div>
 
