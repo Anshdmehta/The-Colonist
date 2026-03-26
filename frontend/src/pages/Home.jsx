@@ -12,6 +12,7 @@ const Home = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cardStyle, setCardStyle] = useState({ rotateX: 0, rotateY: 0 });
   const [spotlightPos, setSpotlightPos] = useState({ x: 50, y: 50 });
+  const [isWhoWeAreComplete, setIsWhoWeAreComplete] = useState(false);
 
   const themes = {
     sixMonth: {
@@ -553,10 +554,10 @@ const Home = () => {
       <AlumniSection />
 
       {/* Who We Are */}
-      <WhoWeAreSection />
+      <WhoWeAreSection onCompletionChange={setIsWhoWeAreComplete} />
 
       {/* Final CTA */}
-      <section className="py-[120px] md:py-[120px] sm:py-[80px] bg-[#16161B] relative overflow-hidden">
+      <section className={`cta-section py-[120px] md:py-[120px] sm:py-[80px] bg-[#16161B] relative overflow-hidden${isWhoWeAreComplete ? ' visible' : ''}`}>
         <div className="absolute inset-0 z-0">
           <img
             src="/devil.png"

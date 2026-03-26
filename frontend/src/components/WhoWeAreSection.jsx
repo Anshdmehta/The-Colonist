@@ -1,9 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-const clamp01 = (v) => Math.max(0, Math.min(1, v));
-const lerp = (a, b, t) => a + (b - a) * t;
-const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-const easeEditorial = (t) => 1 - Math.pow(1 - t, 3);
+const clamp01 = (value) => Math.max(0, Math.min(1, value));
+const lerp = (start, end, amount) => start + (end - start) * amount;
+const easeOutCubic = (value) => 1 - Math.pow(1 - clamp01(value), 3);
+
+const PROGRESS_LERP = 0.08;
+const WHEEL_PROGRESS_STEP = 0.0006;
+const KEYBOARD_PROGRESS_STEP = 0.065;
+const TOUCH_PROGRESS_STEP = 0.0022;
+const IMAGE_SWITCH_DELAY = 0.08;
 
 const STATEMENTS = [
   'We train artists for production.',
@@ -12,147 +17,332 @@ const STATEMENTS = [
   'At The Colonist, identity becomes output.',
 ];
 
-function buildWordList(statements) {
-  const list = [];
+const STORY_IMAGES = [
+  {
+    src: '/portfolio/mech.webp',
+    alt: 'Robotic character artwork representing production-focused training',
+  },
+  {
+    src: '/portfolio/car-main.webp',
+    alt: 'Vehicle artwork representing real pipeline discipline',
+  },
+  {
+    src: '/portfolio/shotgun.webp',
+    alt: 'Weapon artwork representing craft and detail',
+  },
+  {
+    src: '/portfolio/crossbow.webp',
+    alt: 'Hard-surface artwork representing identity through output',
+  },
+];
 
-  statements.forEach((statement, lineIdx) => {
-    const words = statement.trim().split(/\s+/);
+function buildStatementWords(statements) {
+  let wordIndex = 0;
 
-    words.forEach((word, wordIdx) => {
-      list.push({ word, lineIdx, wordIdx });
+  const lines = statements.map((statement, lineIdx) => ({
+    lineIdx,
+    words: statement.trim().split(/\s+/).map((word) => {
+      const metadata = {
+        key: `${lineIdx}-${wordIndex}-${word}`,
+        value: word,
+        index: wordIndex,
+        isHighlighted: false,
+      };
+
+      wordIndex += 1;
+      return metadata;
+    }),
+  }));
+
+  const totalWords = wordIndex;
+  const highlightStartIndex = Math.max(totalWords - 3, 0);
+
+  lines.forEach((line) => {
+    line.words.forEach((word) => {
+      if (word.index >= highlightStartIndex) {
+        word.isHighlighted = true;
+      }
     });
   });
 
-  return list;
+  return {
+    lines,
+    totalWords,
+  };
 }
 
-const WhoWeAreSection = () => {
-  const wordList = useMemo(() => buildWordList(STATEMENTS), []);
+const WhoWeAreSection = ({ onCompletionChange }) => {
+  const story = useMemo(() => buildStatementWords(STATEMENTS), []);
   const sectionRef = useRef(null);
-  const stickyRef = useRef(null);
-  const [revealProgress, setRevealProgress] = useState(0);
+  const targetProgressRef = useRef(0);
+  const smoothedProgressRef = useRef(0);
+  const lastTouchYRef = useRef(null);
+  const allowScrollRef = useRef(false);
+  const completionTimerRef = useRef(null);
+
+  const [smoothedProgress, setSmoothedProgress] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [allowScroll, setAllowScroll] = useState(false);
 
   useEffect(() => {
     let rafId = 0;
 
-    const computeProgress = () => {
-      const element = sectionRef.current;
+    const animate = () => {
+      const nextProgress = lerp(
+        smoothedProgressRef.current,
+        targetProgressRef.current,
+        PROGRESS_LERP
+      );
 
-      if (!element) {
-        return 0;
-      }
+      smoothedProgressRef.current = Math.abs(targetProgressRef.current - nextProgress) < 0.0008
+        ? targetProgressRef.current
+        : nextProgress;
 
-      const rect = element.getBoundingClientRect();
-      const viewportHeight = window.innerHeight || 1;
-      const stickyTop = viewportHeight * 0.25;
-      const stickyHeight = stickyRef.current?.offsetHeight || 0;
-      const scrollableDistance = Math.max(rect.height - stickyHeight - stickyTop, 1);
-
-      return clamp01((stickyTop - rect.top) / scrollableDistance);
+      setSmoothedProgress(smoothedProgressRef.current);
+      rafId = window.requestAnimationFrame(animate);
     };
 
-    const updateProgress = () => {
-      setRevealProgress(computeProgress());
-    };
-
-    const scheduleUpdate = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateProgress);
-    };
-
-    updateProgress();
-    window.addEventListener('scroll', scheduleUpdate, { passive: true });
-    window.addEventListener('resize', scheduleUpdate);
+    rafId = window.requestAnimationFrame(animate);
 
     return () => {
-      window.removeEventListener('scroll', scheduleUpdate);
-      window.removeEventListener('resize', scheduleUpdate);
-      cancelAnimationFrame(rafId);
+      window.cancelAnimationFrame(rafId);
     };
   }, []);
 
-  const totalWords = wordList.length;
-  const step = 1 / totalWords;
+  useEffect(() => {
+    const getInternalRangeState = () => {
+      const element = sectionRef.current;
 
-  const activeLineIdx = useMemo(() => {
-    for (let i = wordList.length - 1; i >= 0; i -= 1) {
-      if (revealProgress >= i * step) {
-        return wordList[i].lineIdx;
+      if (!element || typeof window === 'undefined') {
+        return {
+          isVisible: false,
+          isWithinRange: false,
+        };
       }
+
+      const start = element.offsetTop;
+      const end = start + ((window.innerHeight || 1) * 1.2);
+      const scrollY = window.scrollY;
+      const rect = element.getBoundingClientRect();
+      const isVisible = rect.top < (window.innerHeight || 1) && rect.bottom > 0;
+
+      return {
+        isVisible,
+        isWithinRange: scrollY >= start && scrollY <= end,
+      };
+    };
+
+    const updateLockState = () => {
+      const { isVisible, isWithinRange } = getInternalRangeState();
+      setIsLocked(isVisible && isWithinRange && (!allowScrollRef.current || targetProgressRef.current > 0));
+    };
+
+    const updateTargetProgress = (delta) => {
+      targetProgressRef.current = clamp01(targetProgressRef.current + delta);
+      updateLockState();
+    };
+
+    const shouldCapture = (direction) => {
+      const { isVisible, isWithinRange } = getInternalRangeState();
+
+      if (!isVisible || !isWithinRange) {
+        return false;
+      }
+
+      if (direction > 0) {
+        return !allowScrollRef.current;
+      }
+
+      if (direction < 0) {
+        return targetProgressRef.current > 0;
+      }
+
+      return false;
+    };
+
+    const handleWheel = (event) => {
+      const direction = Math.sign(event.deltaY);
+
+      if (!shouldCapture(direction)) {
+        return;
+      }
+
+      event.preventDefault();
+      updateTargetProgress(event.deltaY * WHEEL_PROGRESS_STEP);
+    };
+
+    const handleKeyDown = (event) => {
+      const keyMap = {
+        ArrowDown: 1,
+        ArrowUp: -1,
+        PageDown: 1,
+        PageUp: -1,
+        ' ': event.shiftKey ? -1 : 1,
+      };
+
+      const direction = keyMap[event.key];
+
+      if (!direction || !shouldCapture(direction)) {
+        return;
+      }
+
+      event.preventDefault();
+      updateTargetProgress(direction * KEYBOARD_PROGRESS_STEP);
+    };
+
+    const handleTouchStart = (event) => {
+      lastTouchYRef.current = event.touches[0]?.clientY ?? null;
+    };
+
+    const handleTouchMove = (event) => {
+      const currentY = event.touches[0]?.clientY;
+
+      if (typeof currentY !== 'number' || typeof lastTouchYRef.current !== 'number') {
+        return;
+      }
+
+      const deltaY = lastTouchYRef.current - currentY;
+      const direction = Math.sign(deltaY);
+
+      if (!shouldCapture(direction)) {
+        lastTouchYRef.current = currentY;
+        return;
+      }
+
+      event.preventDefault();
+      updateTargetProgress(deltaY * TOUCH_PROGRESS_STEP);
+      lastTouchYRef.current = currentY;
+    };
+
+    const resetTouch = () => {
+      lastTouchYRef.current = null;
+    };
+
+    updateLockState();
+    window.addEventListener('scroll', updateLockState, { passive: true });
+    window.addEventListener('resize', updateLockState);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', resetTouch, { passive: true });
+    window.addEventListener('touchcancel', resetTouch, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', updateLockState);
+      window.removeEventListener('resize', updateLockState);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', resetTouch);
+      window.removeEventListener('touchcancel', resetTouch);
+    };
+  }, []);
+
+  const progress = easeOutCubic(smoothedProgress);
+  let visibleWords = Math.floor(progress * story.totalWords);
+
+  if (progress >= 0.99) {
+    visibleWords = story.totalWords;
+  }
+
+  const isComplete = visibleWords === story.totalWords;
+
+  useEffect(() => {
+    if (completionTimerRef.current) {
+      window.clearTimeout(completionTimerRef.current);
+      completionTimerRef.current = null;
     }
 
-    return 0;
-  }, [revealProgress, step, wordList]);
+    if (isComplete) {
+      completionTimerRef.current = window.setTimeout(() => {
+        allowScrollRef.current = true;
+        setAllowScroll(true);
+        setIsLocked(false);
+        onCompletionChange?.(true);
+      }, 300);
 
-  const grainShiftX = lerp(0, -8, revealProgress);
-  const grainShiftY = lerp(0, 10, revealProgress);
-  const dividerT = easeOutCubic(clamp01((revealProgress - 0.82) / 0.18));
-  const dividerOpacity = lerp(0, 0.28, dividerT);
-  const exitFadeT = easeOutCubic(clamp01((revealProgress - 0.88) / 0.12));
-  const contentOpacity = lerp(1, 0.95, exitFadeT);
+      return () => {
+        if (completionTimerRef.current) {
+          window.clearTimeout(completionTimerRef.current);
+          completionTimerRef.current = null;
+        }
+      };
+    }
+
+    allowScrollRef.current = false;
+    setAllowScroll(false);
+    onCompletionChange?.(false);
+
+    return undefined;
+  }, [isComplete, onCompletionChange]);
+
+  const imageTimeline = clamp01((progress - IMAGE_SWITCH_DELAY) / (1 - IMAGE_SWITCH_DELAY))
+    * (STORY_IMAGES.length - 1);
 
   return (
-    <section ref={sectionRef} className="who-we-are-section">
+    <section
+      ref={sectionRef}
+        className={`who-we-are-section${isLocked && !allowScroll ? ' who-we-are-section--locked' : ''}`}
+    >
       <div className="who-we-are-background" aria-hidden="true">
-        <div
-          className="who-we-are-grain"
-          style={{ transform: `translate3d(${grainShiftX}px, ${grainShiftY}px, 0)` }}
-        />
+        <div className="who-we-are-grain" />
         <div className="who-we-are-vignette" />
       </div>
 
-      <div ref={stickyRef} className="who-we-are-sticky">
-        <div
-          className="who-we-are-inner"
-          style={{ opacity: contentOpacity }}
-        >
-          <p className="who-we-are-eyebrow">WHO WE ARE</p>
+      <div className="who-we-are-sticky">
+        <div className="who-we-are-inner">
+          <div className="who-we-are-copy section-text">
+            <p className="who-we-are-eyebrow">WHO WE ARE</p>
 
-          <div className="wwa-statements" aria-label={STATEMENTS.join(' ')}>
-            {STATEMENTS.map((statement, lineIdx) => {
-              const lineWords = statement.trim().split(/\s+/);
-              const globalOffset = wordList.findIndex((word) => word.lineIdx === lineIdx);
-              const isPast = lineIdx < activeLineIdx;
-              const isActive = lineIdx === activeLineIdx;
-
-              return (
+            <div className="wwa-statements" aria-label={STATEMENTS.join(' ')}>
+              {story.lines.map((line) => (
                 <p
-                  key={statement}
-                  className={`wwa-statement wwa-statement--line-${lineIdx + 1}${isActive ? ' wwa-statement--active' : ''}${isPast ? ' wwa-statement--past' : ''}`}
+                  key={`line-${line.lineIdx + 1}`}
+                  className={`wwa-statement wwa-statement--line-${line.lineIdx + 1}`}
                 >
-                  {lineWords.map((word, wordIdx) => {
-                    const globalIdx = globalOffset + wordIdx;
-                    const startAt = globalIdx * step;
-                    const localT = clamp01((revealProgress - startAt) / step);
-                    const wordT = easeEditorial(localT);
+                  {line.words.map((word, wordIdx) => {
+                    const isVisible = word.index <= visibleWords;
 
                     return (
+                      <React.Fragment key={word.key}>
                       <span
-                        key={`${lineIdx}-${wordIdx}`}
-                        className="who-we-are-word"
+                        className={`wwa-word${word.isHighlighted ? ' highlight final-phrase' : ''}${word.isHighlighted && isVisible ? ' highlight--active' : ''}`}
                         style={{
-                          opacity: lerp(0.3, 1, wordT),
-                          filter: `blur(${lerp(2, 0, wordT)}px)`,
+                          opacity: isVisible ? 1 : 0.2,
                         }}
-                      >
-                        {word}
-                        {wordIdx < lineWords.length - 1 ? ' ' : ''}
-                      </span>
+                        >
+                          {word.value}
+                        </span>
+                        {wordIdx < line.words.length - 1 ? ' ' : null}
+                      </React.Fragment>
                     );
                   })}
                 </p>
-              );
-            })}
+              ))}
+            </div>
           </div>
 
-          <div className="who-we-are-dividerRow" aria-hidden="true">
-            <div
-              className="who-we-are-divider"
-              style={{
-                opacity: dividerOpacity,
-                transform: `scaleX(${dividerT})`,
-              }}
-            />
+          <div className="who-we-are-visual" aria-hidden="true">
+            {STORY_IMAGES.map((image, index) => {
+              const imageDistance = Math.abs(imageTimeline - index);
+              const imageProgress = clamp01(1 - imageDistance);
+
+              return (
+                <img
+                  key={image.src}
+                  className="who-we-are-image"
+                  src={image.src}
+                  alt={image.alt}
+                  style={{
+                    opacity: imageProgress,
+                    transform: `scale(${lerp(1.05, 1, imageProgress)})`,
+                    filter: `grayscale(0.55) saturate(0.72) brightness(${lerp(0.82, 0.92, imageProgress)}) contrast(0.94)`,
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
