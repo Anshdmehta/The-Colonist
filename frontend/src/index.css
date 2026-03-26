@@ -310,6 +310,7 @@ code {
 
 .alumni-premium-section {
   position: relative;
+  z-index: 2;
   padding: 110px 0;
   /* Reduced vertical height by ~35% */
   overflow: hidden;
@@ -818,8 +819,9 @@ code {
 /* Who We Are (Premium, Scroll-Synced Typography) */
 .who-we-are-section {
   position: relative;
-  min-height: 220vh;
-  overflow: clip;
+  z-index: 1;
+  height: 140vh;
+  overflow: hidden;
   background:
     linear-gradient(180deg, #060606 0%, #050505 38%, #090909 100%);
 }
@@ -843,22 +845,6 @@ code {
   z-index: 0;
 }
 
-.who-we-are-heroWord {
-  position: absolute;
-  top: 50%;
-  left: 46%;
-  transform-origin: center;
-  font-family: 'Sora', sans-serif;
-  font-size: clamp(320px, 88vw, 1200px);
-  font-weight: 800;
-  letter-spacing: -0.08em;
-  line-height: 0.82;
-  color: #ffffff;
-  white-space: nowrap;
-  filter: blur(8px);
-  user-select: none;
-}
-
 .who-we-are-grain {
   position: absolute;
   inset: -2%;
@@ -878,10 +864,12 @@ code {
 
 .who-we-are-sticky {
   position: sticky;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 25vh;
+  display: flex;
+  align-items: center;
+  min-height: 50vh;
   z-index: 1;
-  padding: clamp(32px, 5vw, 72px) 24px;
+  padding: 0 24px;
 }
 
 .who-we-are-inner {
@@ -889,6 +877,7 @@ code {
   z-index: 1;
   width: min(520px, calc(100vw - 48px));
   margin-left: clamp(8%, 9vw, 12%);
+  transition: opacity 0.35s ease;
 }
 
 .who-we-are-eyebrow {
@@ -909,8 +898,8 @@ code {
   margin: 0;
   padding: 0;
   font-family: 'Sora', sans-serif;
-  font-size: clamp(22px, 2.2vw, 34px);
-  line-height: 1.48;
+  font-size: clamp(28px, 2.5vw, 40px);
+  line-height: 1.5;
   letter-spacing: -0.03em;
   color: rgba(245, 245, 247, 0.9);
   opacity: 0.42;
@@ -966,17 +955,12 @@ code {
 
 @media (max-width: 768px) {
   .who-we-are-section {
-    min-height: 205vh;
+    height: 145vh;
   }
 
   .who-we-are-sticky {
+    min-height: 46vh;
     padding-inline: 18px;
-  }
-
-  .who-we-are-heroWord {
-    left: 54%;
-    font-size: 98vw;
-    filter: blur(6px);
   }
 
   .who-we-are-inner {
@@ -985,7 +969,7 @@ code {
   }
 
   .wwa-statement {
-    font-size: clamp(20px, 5.5vw, 28px);
+    font-size: clamp(24px, 5.8vw, 32px);
     line-height: 1.52;
   }
 

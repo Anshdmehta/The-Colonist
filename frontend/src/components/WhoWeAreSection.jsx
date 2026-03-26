@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeEditorial = (t) => 1 - Math.pow(1 - t, 3);
 
 const STATEMENTS = [
   'We train artists for production.',
@@ -29,6 +29,7 @@ function buildWordList(statements) {
 const WhoWeAreSection = () => {
   const wordList = useMemo(() => buildWordList(STATEMENTS), []);
   const sectionRef = useRef(null);
+  const stickyRef = useRef(null);
   const [revealProgress, setRevealProgress] = useState(0);
 
   useEffect(() => {
@@ -43,9 +44,11 @@ const WhoWeAreSection = () => {
 
       const rect = element.getBoundingClientRect();
       const viewportHeight = window.innerHeight || 1;
-      const scrollableDistance = Math.max(rect.height - viewportHeight, 1);
+      const stickyTop = viewportHeight * 0.25;
+      const stickyHeight = stickyRef.current?.offsetHeight || 0;
+      const scrollableDistance = Math.max(rect.height - stickyHeight - stickyTop, 1);
 
-      return clamp01((0 - rect.top) / scrollableDistance);
+      return clamp01((stickyTop - rect.top) / scrollableDistance);
     };
 
     const updateProgress = () => {
@@ -81,27 +84,16 @@ const WhoWeAreSection = () => {
     return 0;
   }, [revealProgress, step, wordList]);
 
-  const heroWordShiftX = lerp(42, -18, revealProgress);
-  const heroWordShiftY = lerp(-10, 16, revealProgress);
-  const heroWordScale = lerp(1.03, 0.98, revealProgress);
-  const heroWordOpacity = lerp(0.032, 0.05, easeOutCubic(revealProgress));
   const grainShiftX = lerp(0, -8, revealProgress);
   const grainShiftY = lerp(0, 10, revealProgress);
   const dividerT = easeOutCubic(clamp01((revealProgress - 0.82) / 0.18));
   const dividerOpacity = lerp(0, 0.28, dividerT);
+  const exitFadeT = easeOutCubic(clamp01((revealProgress - 0.88) / 0.12));
+  const contentOpacity = lerp(1, 0.95, exitFadeT);
 
   return (
     <section ref={sectionRef} className="who-we-are-section">
       <div className="who-we-are-background" aria-hidden="true">
-        <div
-          className="who-we-are-heroWord"
-          style={{
-            opacity: heroWordOpacity,
-            transform: `translate3d(${heroWordShiftX}px, ${heroWordShiftY}px, 0) scale(${heroWordScale})`,
-          }}
-        >
-          DISCIPLINE
-        </div>
         <div
           className="who-we-are-grain"
           style={{ transform: `translate3d(${grainShiftX}px, ${grainShiftY}px, 0)` }}
@@ -109,8 +101,11 @@ const WhoWeAreSection = () => {
         <div className="who-we-are-vignette" />
       </div>
 
-      <div className="who-we-are-sticky">
-        <div className="who-we-are-inner">
+      <div ref={stickyRef} className="who-we-are-sticky">
+        <div
+          className="who-we-are-inner"
+          style={{ opacity: contentOpacity }}
+        >
           <p className="who-we-are-eyebrow">WHO WE ARE</p>
 
           <div className="wwa-statements" aria-label={STATEMENTS.join(' ')}>
@@ -129,15 +124,15 @@ const WhoWeAreSection = () => {
                     const globalIdx = globalOffset + wordIdx;
                     const startAt = globalIdx * step;
                     const localT = clamp01((revealProgress - startAt) / step);
-                    const wordT = easeInOutCubic(localT);
+                    const wordT = easeEditorial(localT);
 
                     return (
                       <span
                         key={`${lineIdx}-${wordIdx}`}
                         className="who-we-are-word"
                         style={{
-                          opacity: lerp(0.08, 1, wordT),
-                          filter: `blur(${lerp(8, 0, wordT)}px)`,
+                          opacity: lerp(0.3, 1, wordT),
+                          filter: `blur(${lerp(2, 0, wordT)}px)`,
                         }}
                       >
                         {word}
