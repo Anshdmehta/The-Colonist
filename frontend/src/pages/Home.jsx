@@ -574,15 +574,17 @@ const Home = () => {
 
       {/* Final CTA */}
       <section className="cta-section bg-[#0b0b0d] relative">
-        <div className="cta-section__inner relative z-10 max-w-[980px] mx-auto px-6 text-center">
-          <h2 className="cta-section__headline font-['Sora']">
-            Train for production, not practice.
+        <div className="cta-section__inner relative z-10 max-w-[1180px] mx-auto px-6 text-center">
+          <p className="cta-section__label">READY TO START</p>
+          <h2 className="cta-section__headline">
+            <span className="cta-section__headline-primary">Train for production,</span>
+            <span className="cta-section__headline-emphasis">not practice.</span>
           </h2>
           <p className="cta-section__subtext">
             Built for artists ready to work like studios.
           </p>
           <Link to="/contact" className="inline-block cta-section__buttonWrap">
-            <Button className="bg-[#F2C94C] text-[#0E0E11] hover:brightness-95 font-medium px-12 h-14 text-base rounded-[6px] max-w-[260px] mx-auto transition-[filter] duration-200">
+            <Button className="cta-section__button bg-[#F2C94C] text-[#0E0E11] hover:brightness-95 font-medium px-12 h-14 text-base rounded-[6px] max-w-[260px] mx-auto transition-[filter] duration-200">
               Book Consultation
             </Button>
           </Link>
