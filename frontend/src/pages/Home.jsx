@@ -4,7 +4,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import AlumniSection from '../components/AlumniSection';
 import { Button } from '../components/ui/button';
-import { ArrowRight, Settings, Target, Grid, MessageSquare } from 'lucide-react';
+import { Settings, Target, Grid, MessageSquare } from 'lucide-react';
 import WhoWeAreSection from '../components/WhoWeAreSection';
 
 const Home = () => {
@@ -12,7 +12,6 @@ const Home = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cardStyle, setCardStyle] = useState({ rotateX: 0, rotateY: 0 });
   const [spotlightPos, setSpotlightPos] = useState({ x: 50, y: 50 });
-  const [isWhoWeAreComplete, setIsWhoWeAreComplete] = useState(false);
   const [isHeroVideoReady, setIsHeroVideoReady] = useState(false);
 
   const themes = {
@@ -571,31 +570,20 @@ const Home = () => {
       <AlumniSection />
 
       {/* Who We Are */}
-      <WhoWeAreSection onCompletionChange={setIsWhoWeAreComplete} />
+      <WhoWeAreSection />
 
       {/* Final CTA */}
-      <section className={`cta-section py-[120px] md:py-[120px] sm:py-[80px] bg-[#16161B] relative overflow-hidden${isWhoWeAreComplete ? ' visible' : ''}`}>
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/devil.png"
-            alt="Start Your Journey"
-            className="w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#16161B] via-[#16161B]/70 to-[#16161B]/50"></div>
-        </div>
-
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6 text-center">
-          <h2 className="font-['Sora'] text-[48px] font-semibold mb-6 text-[#F5F5F7]">
-            Start Your Game Art Journey
+      <section className="cta-section bg-[#0b0b0d] relative">
+        <div className="cta-section__inner relative z-10 max-w-[980px] mx-auto px-6 text-center">
+          <h2 className="cta-section__headline font-['Sora']">
+            Train for production, not practice.
           </h2>
-          <p className="text-[#B5B5C0] text-lg mb-12 max-w-2xl mx-auto leading-[1.6]">
-            Speak with our admissions team to explore training paths, specialization options, and
-            portfolio preparation.
+          <p className="cta-section__subtext">
+            Built for artists ready to work like studios.
           </p>
-          <Link to="/contact" className="inline-block">
-            <Button className="bg-[#F2C94C] text-[#0E0E11] hover:bg-[#F2C94C]/90 font-medium px-10 h-14 text-lg rounded-md max-w-[240px] mx-auto">
+          <Link to="/contact" className="inline-block cta-section__buttonWrap">
+            <Button className="bg-[#F2C94C] text-[#0E0E11] hover:brightness-95 font-medium px-12 h-14 text-base rounded-[6px] max-w-[260px] mx-auto transition-[filter] duration-200">
               Book Consultation
-              <ArrowRight className="ml-2" size={20} />
             </Button>
           </Link>
         </div>
