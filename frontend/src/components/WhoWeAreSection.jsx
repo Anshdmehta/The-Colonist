@@ -280,6 +280,10 @@ const WhoWeAreSection = ({ onCompletionChange }) => {
 
   const imageTimeline = clamp01((progress - IMAGE_SWITCH_DELAY) / (1 - IMAGE_SWITCH_DELAY))
     * (STORY_IMAGES.length - 1);
+  const activeImageIndex = Math.min(
+    Math.floor(progress * STORY_IMAGES.length),
+    STORY_IMAGES.length - 1
+  );
 
   return (
     <section
@@ -324,26 +328,34 @@ const WhoWeAreSection = ({ onCompletionChange }) => {
             </div>
           </div>
 
-          <div className="who-we-are-visual" aria-hidden="true">
-            {STORY_IMAGES.map((image, index) => {
-              const imageDistance = Math.abs(imageTimeline - index);
-              const imageProgress = clamp01(1 - imageDistance);
+        <div className="who-we-are-visual" aria-hidden="true">
+          {STORY_IMAGES.map((image, index) => {
+            const imageDistance = Math.abs(imageTimeline - index);
+            const imageProgress = clamp01(1 - imageDistance);
+            let imageState = 'is-rest';
 
-              return (
-                <img
-                  key={image.src}
-                  className="who-we-are-image"
-                  src={image.src}
-                  alt={image.alt}
-                  style={{
-                    opacity: imageProgress,
-                    transform: `scale(${lerp(1.05, 1, imageProgress)})`,
-                    filter: `grayscale(0.55) saturate(0.72) brightness(${lerp(0.82, 0.92, imageProgress)}) contrast(0.94)`,
-                  }}
-                />
-              );
-            })}
-          </div>
+            if (index === activeImageIndex) {
+              imageState = 'is-active';
+            } else if (index === activeImageIndex + 1) {
+              imageState = 'is-incoming';
+            } else if (index === activeImageIndex - 1) {
+              imageState = 'is-previous';
+            }
+
+            return (
+              <img
+                key={image.src}
+                className={`who-we-are-image image-card ${imageState}`}
+                src={image.src}
+                alt={image.alt}
+                style={{
+                  opacity: imageState === 'is-rest' ? 0 : undefined,
+                  filter: `grayscale(0.55) saturate(0.72) brightness(${lerp(0.82, 0.92, imageProgress)}) contrast(0.94)`,
+                }}
+              />
+            );
+          })}
+        </div>
         </div>
       </div>
     </section>

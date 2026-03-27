@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -13,6 +13,7 @@ const Home = () => {
   const [cardStyle, setCardStyle] = useState({ rotateX: 0, rotateY: 0 });
   const [spotlightPos, setSpotlightPos] = useState({ x: 50, y: 50 });
   const [isWhoWeAreComplete, setIsWhoWeAreComplete] = useState(false);
+  const [isHeroVideoReady, setIsHeroVideoReady] = useState(false);
 
   const themes = {
     sixMonth: {
@@ -166,24 +167,40 @@ const Home = () => {
     return () => observer.disconnect();
   }, []);
 
-
-
   return (
     <div className="bg-[#0E0E11] text-[#F5F5F7]">
       <Header />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden bg-black">
-        {/* Layer 1 — Background Image (desktop only) */}
-        <div
-          className="absolute inset-0 z-0 hidden sm:block hero-bg"
-          style={{
-            backgroundImage: "url('/hero/white-mech.webp')",
-            backgroundPosition: 'right center',
-            filter: 'brightness(0.9) contrast(1.05) blur(0.5px)',
-            willChange: 'transform',
-          }}
-        />
+        <div className="absolute inset-0 z-0 hidden sm:block hero-bg">
+          <video
+            className="absolute inset-0 h-full w-full object-cover object-right"
+            muted
+            playsInline
+            preload="auto"
+            autoPlay
+            loop
+            style={{
+              opacity: isHeroVideoReady ? 1 : 0,
+              transition: 'opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1)',
+            }}
+            onCanPlay={() => setIsHeroVideoReady(true)}
+          >
+            <source src="/videos/robo.mp4" type="video/mp4" />
+          </video>
+          <div
+            className="absolute inset-0 hero-bg"
+            style={{
+              backgroundImage: "url('/hero/white-mech.webp')",
+              backgroundPosition: 'right center',
+              filter: 'brightness(0.9) contrast(1.05) blur(0.5px)',
+              willChange: 'transform',
+              opacity: isHeroVideoReady ? 0 : 1,
+              transition: 'opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1)',
+            }}
+          />
+        </div>
 
         {/* Layer 2 — Dark Overlay + Vignette */}
         <div

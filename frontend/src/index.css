@@ -994,21 +994,47 @@ span[data-final] {
   opacity: 0.32;
 }
 
-.who-we-are-image {
+.who-we-are-image,
+.image-card {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  border-radius: 12px;
+  border-radius: 16px;
+  overflow: hidden;
   transition:
-    opacity 0.72s ease 0.08s,
-    transform 0.72s ease 0.08s,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s ease,
     filter 0.72s ease 0.08s;
   box-shadow:
     0 28px 70px rgba(0, 0, 0, 0.35),
     inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.image-card.is-active {
+  z-index: 3;
+  transform: translateY(0%) scale(1);
+  opacity: 1;
+}
+
+.image-card.is-incoming {
+  z-index: 2;
+  transform: translateY(40%) scale(0.98);
+  opacity: 0.6;
+}
+
+.image-card.is-previous {
+  z-index: 1;
+  transform: translateY(-20%) scale(0.96);
+  opacity: 0.3;
+}
+
+.image-card.is-rest {
+  z-index: 0;
+  transform: translateY(48%) scale(0.95);
+  opacity: 0;
 }
 
 .cta-section {
