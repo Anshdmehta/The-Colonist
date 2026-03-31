@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Instagram, Facebook, Linkedin, Youtube } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -24,6 +25,44 @@ export const Footer = () => {
             <p className="mt-3 max-w-[320px] text-base leading-7 text-[#93939E]">
               Industry-focused training for artists entering real production pipelines.
             </p>
+            <div className="mt-4 flex items-center justify-center gap-3 md:justify-start">
+              <a
+                href="https://www.instagram.com/threecolonist"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/45 transition-colors duration-200 hover:text-[#f5c542]"
+                aria-label="Instagram"
+              >
+                <Instagram size={16} strokeWidth={1.9} />
+              </a>
+              <a
+                href="https://www.facebook.com/learngamedesigning"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/45 transition-colors duration-200 hover:text-[#f5c542]"
+                aria-label="Facebook"
+              >
+                <Facebook size={16} strokeWidth={1.9} />
+              </a>
+              <a
+                href="https://in.linkedin.com/company/thecolonist"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/45 transition-colors duration-200 hover:text-[#f5c542]"
+                aria-label="LinkedIn"
+              >
+                <Linkedin size={16} strokeWidth={1.9} />
+              </a>
+              <a
+                href="https://www.youtube.com/@threecolonist"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/45 transition-colors duration-200 hover:text-[#f5c542]"
+                aria-label="YouTube"
+              >
+                <Youtube size={16} strokeWidth={1.9} />
+              </a>
+            </div>
             <div className="mx-auto mt-4 h-px w-14 bg-[#f5c542]/55 md:mx-0" />
           </div>
 
